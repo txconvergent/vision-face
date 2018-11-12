@@ -4,36 +4,62 @@ import Camera from 'react-html5-camera-photo';
 import 'react-html5-camera-photo/build/css/index.css';
 import CardHeader from '@material-ui/core/CardHeader';
 import '../index.css';
-import ImgToBase64 from 'react-native-image-base64';
+import alan_image from './DatabaseImage.js'
+import credentials from '../creds';
+require('dotenv').config() //process.env.SECRET_KEY
+//import ImgToBase64 from 'react-native-image-base64';
  
+function getBinary(base64Image) {
+        var binaryImg = atob(base64Image);
+        var length = binaryImg.length;
+        var ab = new ArrayBuffer(length);
+        var ua = new Uint8Array(ab);
+        for (var i = 0; i < length; i++) {
+          ua[i] = binaryImg.charCodeAt(i);
+        }
+
+        var blob = new Blob([ab], {
+          type: "image/jpeg"
+        });
+
+        return ab;
+      }
+
 class App extends Component {
     onTakePhoto (dataUri) {
         // Make rest call
-        var rekognition = new AWS.Rekognition();
-        var targetBytes = null;
-
         // Convert test image to base64... should really be done once on startup(look at react-html5-camera-photo' api)
-        ImgToBase64.getBase64String('../Images/alan.jpg', (err, base64string) => setValue(base64string));
-        const setValue = ({base64}) => (
-          targetBytes = base64
-        )
+        var targetBytes = alan_image;
+        AWS.config.update(credentials);
+        dataUri = dataUri.split("data:image/png;base64,")[1];
+
+       // ImgToBase64.getBase64String('../Images/alan.jpg', (err, base64string) => setValue(base64string));
         if (targetBytes === null) {
           console.log("FAIL");
           return;
         }
         var params = {
-          SimilarityThreshold: 90, 
           SourceImage: {
-           Bytes:dataUri
+           Bytes: getBinary(dataUri)
           }, 
           TargetImage: {
-           Bytes:targetBytes
-          }
+           Bytes: getBinary(targetBytes)
+          },
+          SimilarityThreshold: 90,
          };
+        var rekognition = new AWS.Rekognition();
         rekognition.compareFaces(params, function (err, data) {
           if (err) console.log(err, err.stack); // an error occurred
-          else     console.log(data);           // successful response
+          else  {
+            console.log(data)
+            if (data.FaceMatches.length > 0) {
+              alert("ACCESS GRANTED!")
+            } else {
+              alert ("ACCESS DENIED!")
+            }
+          }        // successful response
         });
+      
         
       }
 
