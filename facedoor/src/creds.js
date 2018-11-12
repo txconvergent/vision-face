@@ -1,3 +1,3 @@
-const credentials = { "accessKeyId": "AKIAJT6ZBWC3R2AFK7GQ", "secretAccessKey": "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", "region": "us-east-1" }
+const credentials = { "accessKeyId": "AKIAIVEQQ6B3LBX4NUUQ", "secretAccessKey": "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", "region": "us-east-1" }
 
 export default credentials
