@@ -26,7 +26,7 @@ function getBinary(base64Image) {
 }
 
 class App extends Component {
-  compare = function(targetBytes, dataUri){
+  function compare(targetBytes, dataUri){
     AWS.config.update(credentials);
     dataUri = dataUri.split("data:image/png;base64,")[1];
     // ImgToBase64.getBase64String('../Images/alan.jpg', (err, base64string) => setValue(base64string));
@@ -57,12 +57,12 @@ class App extends Component {
     });
   }
 
-  readImage = function(url, dataUri, callback) {
+  function readImage(url, dataUri, callback) {
     var request = new
     XMLHttpRequest();   request.onload = function() {
       var file = new FileReader();
       file.onloadend = function() {
-        this.compare(file.result, dataUri);
+        compare(file.result, dataUri);
       }
       file.readAsDataURL(request.response);
     };
