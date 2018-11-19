@@ -78,9 +78,6 @@ class App extends Component {
 
 
 }
-callback(){
-
-}
 // callback(base64, dataUri) {
 //     console.log(base64);
 //     var tgt = base64.split(',')[1];
