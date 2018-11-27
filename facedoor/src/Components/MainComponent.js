@@ -10,6 +10,10 @@ require('dotenv').config() //process.env.SECRET_KEY
 //import ImgToBase64 from 'react-native-image-base64';
 
 function getBinary(base64Image) {
+  console.log(base64Image);
+  console.log(typeof base64Image);
+  base64Image = base64Image.split("base64,")[1];
+  console.log(base64Image);
   var binaryImg = atob(base64Image);
   var length = binaryImg.length;
   var ab = new ArrayBuffer(length);
@@ -24,60 +28,70 @@ function getBinary(base64Image) {
 
   return ab;
 }
-
-class App extends Component {
-  function compare(targetBytes, dataUri){
-    AWS.config.update(credentials);
-    dataUri = dataUri.split("data:image/png;base64,")[1];
-    // ImgToBase64.getBase64String('../Images/alan.jpg', (err, base64string) => setValue(base64string));
-    if (targetBytes === null) {
-      console.log("FAIL");
-      return;
+function readImage(url, dataUri, callback) {
+  var request = new
+  XMLHttpRequest();   request.onload = function() {
+    var file = new FileReader();
+    file.onloadend = function() {
+      compare(file.result, dataUri, callback);
     }
-    var params = {
-      SourceImage: {
-        Bytes: getBinary(dataUri)
-      },
-      TargetImage: {
-        Bytes: getBinary(targetBytes)
-      },
-      SimilarityThreshold: 90,
-    };
-    var rekognition = new AWS.Rekognition();
-    rekognition.compareFaces(params, function (err, data) {
-      if (err) console.log(err, err.stack); // an error occurred
-      else  {
-        console.log(data)
-        if (data.FaceMatches.length > 0) {
-          alert("ACCESS GRANTED!")
-        } else {
-          alert ("ACCESS DENIED!")
-        }
-      }        // successful response
-    });
-  }
+    file.readAsDataURL(request.response);
+  };
+  request.open('GET', url);
+  request.responseType = 'blob';
+  request.send();
+}
 
-  function readImage(url, dataUri, callback) {
-    var request = new
-    XMLHttpRequest();   request.onload = function() {
-      var file = new FileReader();
-      file.onloadend = function() {
-        compare(file.result, dataUri);
-      }
-      file.readAsDataURL(request.response);
-    };
-    request.open('GET', url);
-    request.responseType = 'blob';
-    request.send();
+function compare(targetBytes, dataUri, callback){
+  AWS.config.update(credentials);
+
+  // ImgToBase64.getBase64String('../Images/alan.jpg', (err, base64string) => setValue(base64string));
+  if (targetBytes === null) {
+    console.log("FAIL");
+    return;
   }
+  var params = {
+    SourceImage: {
+      Bytes: getBinary(dataUri)
+    },
+    TargetImage: {
+      Bytes: getBinary(targetBytes)
+    },
+    SimilarityThreshold: 90,
+  };
+  var rekognition = new AWS.Rekognition();
+  rekognition.compareFaces(params, function (err, data) {
+    if (err) console.log(err, err.stack); // an error occurred
+    else  {
+      console.log(data)
+      if (data.FaceMatches.length > 0) {
+        callback(true)
+      } else {
+        callback(false)
+      }
+    }        // successful response
+  });
+}
+class App extends Component {
+
+
 
   onTakePhoto (dataUri) {
-    // Make rest call
-    // Convert test image to base64... should really be done once on startup(look at react-html5-camera-photo' api)
-   this.readImage("./images/alan.jpg", dataUri);
-
-
-}
+    var TOTAL_COUNT = 2
+    for (var i = 1; i <= TOTAL_COUNT; i++){
+      readImage("faces/image"+i+".jpg", dataUri, function(wasMatch) {
+          if (wasMatch){
+            alert("Access Granted");
+          }
+          else {
+            TOTAL_COUNT--;
+            if (TOTAL_COUNT == 0){
+              alert("Access Denied");
+            }
+          }
+      });
+    }
+  }
 // callback(base64, dataUri) {
 //     console.log(base64);
 //     var tgt = base64.split(',')[1];
