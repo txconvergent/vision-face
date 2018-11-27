@@ -42,3 +42,7 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
+
+Current Status of Project:
+
+Currently we have a basic frontend and backend designed that allows a client to take a photo of you and then compares it with a database of faces. Some features we would like to add include a redesigned frontend and functionality to add and delete users without actually entering the database and manually changing face files.
